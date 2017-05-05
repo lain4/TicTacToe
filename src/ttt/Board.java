@@ -1,7 +1,6 @@
 package ttt;
 
-import entity.Enemy;
-import entity.Player;
+import entity.AI;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -22,14 +21,13 @@ import java.util.Optional;
  * Created by lain on 22.04.2017.
  */
 public class Board extends GridPane {
-    private Player you;
-    private Enemy en;
+    private int board;
     private Stage stage;
 
     Board(Stage stage) {
-        you = new Player("Mii");
-        en = new Enemy("Andou");
+        board = 0;
         this.stage = stage;
+        new AI("Enma").sequence();
         init();
     }
 
@@ -52,14 +50,14 @@ public class Board extends GridPane {
                 //ASSIGN ACTIONs
                 c.setOnMouseClicked(e -> {
                     if (!c.isClaimed()) {
-                        c.setValue(BitTacTool.turn(you.get(), en.get()));
+                        c.setValue(BitTacTool.turn(board));
+                        register(c.getIndex());
                     }
-                    register(c.getIndex());
-                    if (BitTacTool.hasWon(you.get()))
+                    if (BitTacTool.p1Won(board))
                         showEnd("X won!");
-                    else if (BitTacTool.hasWon(en.get()))
+                    else if (BitTacTool.p2Won(board))
                         showEnd("O won!");
-                    else if (BitTacTool.allTaken(you.get(), en.get()))
+                    else if (BitTacTool.allTaken(board))
                         showEnd("GG! DRAW");
                 });
 
@@ -73,17 +71,17 @@ public class Board extends GridPane {
     }
 
     private void register(int n) {
-        if (BitTacTool.turn(you.get(), en.get()))
-            you.choose(n);
+        if (BitTacTool.turn(board))
+            board |= (1 << (n + 9));
         else
-            en.choose(n);
+            board |= (1 << n);
     }
 
     private void showEnd(String s) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("EndScreen");
         alert.setHeaderText(s);
-        alert.setContentText("Stats and trashtalk");
+        alert.setContentText("Smart person has beaten Mr. stupid");
 
         ButtonType rematch = new ButtonType("Rematch");
         ButtonType exit = new ButtonType("Exit", ButtonBar.ButtonData.CANCEL_CLOSE);
